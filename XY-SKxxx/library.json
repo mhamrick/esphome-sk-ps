@@ -1,0 +1,38 @@
+{
+  "name": "XY-SKxxx",
+  "version": "0.0.1",
+  "description": "Library for controlling XY-SK120 and other XY-SKxxx power supplies",
+  "keywords": "power supply, modbus, xy-sk120",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/csvke/XY-SK120-Modbus-RTU-TTL.git"
+  },
+  "authors": [
+    {
+      "name": "Frankie Yuen"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "4-20ma/ModbusMaster": "^2.0.1"
+  },
+  "frameworks": "arduino",
+  "platforms": ["espressif32"],
+  "export": {
+    "include": [
+      "library.json",
+      "library.properties",
+      "LICENSE",
+      "README.md",
+      "XY-SKxxx.h",
+      "XY-SKxxx.cpp",
+      "XY-SKxxx-internal.h",
+      "XY-SKxxx-basic.cpp",
+      "XY-SKxxx-cache.cpp",
+      "XY-SKxxx-measurement.cpp",
+      "XY-SKxxx-protection.cpp",
+      "XY-SKxxx-settings.cpp",
+      "include/XY-SKxxx_Config.h"
+    ]
+  }
+}

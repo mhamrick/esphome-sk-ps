@@ -1,0 +1,91 @@
+import esphome.codegen as cg
+from esphome.components import number
+import esphome.config_validation as cv
+from esphome.const import (
+    CONF_ID,
+    CONF_MAX_VALUE,
+    CONF_MIN_VALUE,
+    CONF_MODE,
+    CONF_STEP,
+    CONF_UNIT_OF_MEASUREMENT,
+    ENTITY_CATEGORY_CONFIG,
+    ICON_EMPTY,
+    UNIT_AMPERE,
+    UNIT_VOLT,
+)
+
+from .. import CONF_XYSK_ID, XYSK_COMPONENT_SCHEMA, xysk_ns
+
+DEPENDENCIES = ["xysk"]
+
+CODEOWNERS = ["@syssi"]
+
+DEFAULT_STEP = 1
+
+CONF_VOLTAGE_SETTING = "voltage_setting"
+CONF_CURRENT_SETTING = "current_setting"
+
+NUMBERS = {
+    CONF_VOLTAGE_SETTING: 0x0000,
+    CONF_CURRENT_SETTING: 0x0001,
+}
+
+XyskNumber = xysk_ns.class_("XyskNumber", number.Number, cg.Component)
+
+XYSKNUMBER_SCHEMA = (
+    number.number_schema(
+        XyskNumber,
+        icon=ICON_EMPTY,
+        entity_category=ENTITY_CATEGORY_CONFIG,
+        unit_of_measurement=UNIT_VOLT,
+    )
+    .extend(
+        {
+            cv.Optional(CONF_STEP, default=0.01): cv.float_,
+            cv.Optional(CONF_MODE, default="BOX"): cv.enum(
+                number.NUMBER_MODES, upper=True
+            ),
+        }
+    )
+    .extend(cv.COMPONENT_SCHEMA)
+)
+
+
+CONFIG_SCHEMA = XYSK_COMPONENT_SCHEMA.extend(
+    {
+        cv.Optional(CONF_VOLTAGE_SETTING): XYSKNUMBER_SCHEMA.extend(
+            {
+                cv.Optional(CONF_MIN_VALUE, default=0.0): cv.float_,
+                cv.Optional(CONF_MAX_VALUE, default=50.0): cv.float_,
+            }
+        ),
+        cv.Optional(CONF_CURRENT_SETTING): XYSKNUMBER_SCHEMA.extend(
+            {
+                cv.Optional(
+                    CONF_UNIT_OF_MEASUREMENT, default=UNIT_AMPERE
+                ): cv.string_strict,
+                cv.Optional(CONF_MIN_VALUE, default=0.0): cv.float_,
+                cv.Optional(CONF_MAX_VALUE, default=20.0): cv.float_,
+            }
+        ),
+    }
+)
+
+
+async def to_code(config):
+    hub = await cg.get_variable(config[CONF_XYSK_ID])
+    for key, address in NUMBERS.items():
+        if key in config:
+            conf = config[key]
+            var = cg.new_Pvariable(conf[CONF_ID])
+            await cg.register_component(var, conf)
+            await number.register_number(
+                var,
+                conf,
+                min_value=conf[CONF_MIN_VALUE],
+                max_value=conf[CONF_MAX_VALUE],
+                step=conf[CONF_STEP],
+            )
+            cg.add(getattr(hub, f"set_{key}_number")(var))
+            cg.add(var.set_parent(hub))
+            cg.add(var.set_holding_register(address))
