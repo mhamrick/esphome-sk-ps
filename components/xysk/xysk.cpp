@@ -172,7 +172,7 @@ void Xysk::on_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->firmware_version_sensor_, xysk_get_16bit(REG_VERSION * 2) * 0.1f);
 
   //  26    0x00 0xXX        Internal temperature (register 0x000D)  Temperature in °C
-  this->publish_state_(this->internal_temperature_sensor_, (float) xysk_get_16bit(REG_T_IN * 2));
+  this->publish_state_(this->internal_temperature_sensor_, xysk_get_16bit(REG_T_IN * 2) * 0.1f);
 }
 
 void Xysk::update() {
